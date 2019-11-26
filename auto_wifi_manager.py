@@ -33,6 +33,8 @@ class Ui(QDialog):
         self.wifi_Del = self.wifiWidget.findChild(QPushButton, "wifi_Del")
         self.wifi_status = self.wifiWidget.findChild(QLabel, "status_label")
 
+        self.wifi_path = ""
+
         self.initialization()
 
     def initialization(self):
@@ -49,8 +51,8 @@ class Ui(QDialog):
 
         self.wifi_list_combo.addItem("Select WiFi")
         self.wifi_list_combo.currentIndexChanged.connect(self.wifi_select_change)
-        self.wifi_Edit.clicked.connect(self.wifiEdit_btn_callBack)
-        self.wifi_Del.clicked.connect(self.wifiDel_btn_callBack)
+        self.wifi_Edit.clicked.connect(self.wifi_edit_btn_callback)
+        self.wifi_Del.clicked.connect(self.wifi_del_btn_callback)
         self.wifi_psk.setEnabled(False)
         self.wifi_ssid.setEnabled(False)
         self.wifi_Edit.setEnabled(False)
@@ -92,20 +94,22 @@ class Ui(QDialog):
             self.setEnabled(False)
             self.wifiWidget.show()
             wifi_list = []
-            
-            self.wifi_path = directory+"/etc/wpa_supplicant/wpa_supplicant.conf"
+            self.wifi_path = directory + "/etc/wpa_supplicant/wpa_supplicant.conf"
+
             if os.path.isfile(self.wifi_path):
                 f = open(self.wifi_path, "r")
-                data = f.read().split("\n")
+                data = [line.strip() for line in f.read().split("\n") if line.split()]
                 f.close()
 
                 for line in range(len(data)):
-                    if re.findall("^network",data[line]) and re.findall("^ssid", data[line+1]):
+                    if re.findall("^network", data[line]) and re.findall("^ssid", data[line+1]):
                         wifi_list.append(data[line+1][6:-1])
+                self.wifi_list_combo.clear()
+                self.wifi_list_combo.addItem("Select WiFi")
                 self.wifi_list_combo.addItems(wifi_list)
-
             else:
-                self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file not found...</span></p></body></html>")
+                self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential "
+                                                "file not found...</span></p></body></html>")
         else:
             self.final_status_label.setText("")
 
@@ -124,7 +128,7 @@ class Ui(QDialog):
             self.wifi_Edit.setEnabled(False)
             self.wifi_Del.setEnabled(False)
 
-    def wifiEdit_btn_callBack(self):
+    def wifi_edit_btn_callback(self):
         if self.wifi_Edit.text() == "Edit":
             self.wifi_psk.setEnabled(True)
             self.wifi_list_combo.setEnabled(False)
@@ -139,12 +143,12 @@ class Ui(QDialog):
     def wifi_update(self):
         if os.path.isfile(self.wifi_path):
             f = open(self.wifi_path, "r")
-            data = f.read().split("\n")
+            data = [line.strip() for line in f.read().split("\n") if line.split()]
             f.close()
 
             for line in range(len(data)):
-                if re.findall('^ssid="'+self.wifi_ssid.text()+'"', data[line]):
-                    data[line+1] = 'psk="'+ str(self.wifi_psk.text()) + '"'
+                if re.findall('^ssid="' + self.wifi_ssid.text() + '"', data[line]):
+                    data[line+1] = 'psk="' + str(self.wifi_psk.text()) + '"'
             
             temp = ""
             for line in data:
@@ -154,13 +158,14 @@ class Ui(QDialog):
             f.close()
             return True
         else:
-            self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file not found...</span></p></body></html>")
+            self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
+                                            "not found...</span></p></body></html>")
             return False
 
-    def wifiDel_btn_callBack(self):
+    def wifi_del_btn_callback(self):
         if os.path.isfile(self.wifi_path):
             f = open(self.wifi_path, "r")
-            data = f.read().split("\n")
+            data = [line.strip() for line in f.read().split("\n") if line.split()]
             f.close()
 
             inNet = False
@@ -169,7 +174,7 @@ class Ui(QDialog):
 
             for line in range(len(data)):
                 if inNet:
-                    if re.findall('^}',data[line]):
+                    if re.findall('^}', data[line]):
                         if match:
                             inNetLine.append(line)
                             for j in range(len(inNetLine)-1):
@@ -177,12 +182,12 @@ class Ui(QDialog):
                             inNet = False
                             inNetLine = []
                             match = False
-                            self.wifi_status.setText("Wifi detatils deleted.")
+                            self.wifi_status.setText("Wifi details deleted.")
                             break
                         else:
                             inNet = False
                             inNetLine = []
-                    if re.findall('^ssid="'+self.wifi_ssid.text()+'"', data[line]):
+                    if re.findall('^ssid="' + self.wifi_ssid.text() + '"', data[line]):
                         match = True
                         inNetLine.append(line)
                     inNetLine.append(line)
@@ -199,10 +204,10 @@ class Ui(QDialog):
             f.close()
             return True
         else:
-            self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file not found...</span></p></body></html>")
+            self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
+                                            "not found...</span></p></body></html>")
             return False
 
-    
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
