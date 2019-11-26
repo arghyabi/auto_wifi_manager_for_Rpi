@@ -4,6 +4,7 @@ import re
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 import drive_found
 
@@ -32,6 +33,9 @@ class Ui(QDialog):
         self.wifi_Edit = self.wifiWidget.findChild(QPushButton, "wifi_Edit")
         self.wifi_Del = self.wifiWidget.findChild(QPushButton, "wifi_Del")
         self.wifi_status = self.wifiWidget.findChild(QLabel, "status_label")
+        self.availableWiFiradio = self.wifiWidget.findChild(QRadioButton, "availableWiFiradio")
+        self.addNewWifiradio = self.wifiWidget.findChild(QRadioButton, "addNewWifiradio")
+        self.diaglog_btn = self.wifiWidget.findChild(QDialogButtonBox, "diaglog_box")
 
         self.wifi_path = ""
 
@@ -46,7 +50,7 @@ class Ui(QDialog):
         self.verifyBtn.clicked.connect(lambda: self.verify_device(self.combobox.currentText()))
         self.frame.setEnabled(False)
         self.verifyStatus.setText("")
-        self.wifi_credential.stateChanged.connect(lambda: self.add_modify_wifi_credential(self.combobox.currentText()))
+        self.wifi_credential.stateChanged.connect(self.add_modify_wifi_credential)
         self.ip_founder_checkBox.stateChanged.connect(self.ip_founder)
 
         self.wifi_list_combo.addItem("Select WiFi")
@@ -58,6 +62,10 @@ class Ui(QDialog):
         self.wifi_Edit.setEnabled(False)
         self.wifi_Del.setEnabled(False)
         self.wifi_status.setText("")
+        self.diaglog_btn.clicked.connect(lambda: self.dialog_btn_callback())
+
+        self.wifiWidget.setWindowFlag(Qt.WindowCloseButtonHint, False)
+        self.wifiWidget.setWindowFlag(Qt.WindowMaximizeButtonHint, False)
 
     def verify_device(self, directory):
         if os.path.isdir(directory + "/home/pi/"):
@@ -89,12 +97,12 @@ class Ui(QDialog):
         self.frame.setEnabled(False)
         self.verifyStatus.setText("")
 
-    def add_modify_wifi_credential(self, directory):
+    def add_modify_wifi_credential(self):
         if self.wifi_credential.isChecked():
             self.setEnabled(False)
             self.wifiWidget.show()
             wifi_list = []
-            self.wifi_path = directory + "/etc/wpa_supplicant/wpa_supplicant.conf"
+            self.wifi_path = self.combobox.currentText() + "/etc/wpa_supplicant/wpa_supplicant.conf"
 
             if os.path.isfile(self.wifi_path):
                 f = open(self.wifi_path, "r")
@@ -112,6 +120,10 @@ class Ui(QDialog):
                                                 "file not found...</span></p></body></html>")
         else:
             self.final_status_label.setText("")
+
+    def dialog_btn_callback(self):
+        self.wifiWidget.hide()
+        self.setEnabled(True)
 
     def ip_founder(self):
         pass
@@ -132,13 +144,21 @@ class Ui(QDialog):
         if self.wifi_Edit.text() == "Edit":
             self.wifi_psk.setEnabled(True)
             self.wifi_list_combo.setEnabled(False)
+            self.availableWiFiradio.setEnabled(False)
+            self.addNewWifiradio.setEnabled(False)
+            self.wifi_Del.setEnabled(False)
             self.wifi_Edit.setText("OK")
         else:
             self.wifi_Edit.setText("Edit")
             if self.wifi_update():
                 self.wifi_list_combo.setEnabled(True)
+                self.availableWiFiradio.setEnabled(True)
+                self.addNewWifiradio.setEnabled(True)
+                self.wifi_Del.setEnabled(True)
                 self.wifi_psk.setEnabled(False)
                 self.wifi_psk.setText("")
+                self.wifi_status.setText("<html><head/><body><p><span style='color:#177B0A;'>Wifi details updated."
+                                            "</span></p></body></html>")
 
     def wifi_update(self):
         if os.path.isfile(self.wifi_path):
@@ -158,7 +178,7 @@ class Ui(QDialog):
             f.close()
             return True
         else:
-            self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
+            self.wifi_status.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
                                             "not found...</span></p></body></html>")
             return False
 
@@ -182,7 +202,6 @@ class Ui(QDialog):
                             inNet = False
                             inNetLine = []
                             match = False
-                            self.wifi_status.setText("Wifi details deleted.")
                             break
                         else:
                             inNet = False
@@ -202,14 +221,21 @@ class Ui(QDialog):
             f = open(self.wifi_path, "w")
             f.write(temp)
             f.close()
+            self.add_modify_wifi_credential()
+            self.wifi_status.setText("<html><head/><body><p><span style='color:#177B0A;'>Wifi details deleted."
+                                            "</span></p></body></html>")
             return True
         else:
-            self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
+            self.wifi_status.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
                                             "not found...</span></p></body></html>")
             return False
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = Ui()
-    sys.exit(app.exec_())
+    if os.getuid() != 0:
+        print("Permission Denied\nRun as Super User")
+        exit(0)
+    else:
+        app = QApplication(sys.argv)
+        window = Ui()
+        sys.exit(app.exec_())
