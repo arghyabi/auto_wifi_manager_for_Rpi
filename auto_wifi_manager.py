@@ -31,6 +31,7 @@ class Ui(QDialog):
         self.wifi_ssid = self.wifiWidget.findChild(QLineEdit, "wifi_ssid")
         self.wifi_psk = self.wifiWidget.findChild(QLineEdit, "wifi_psk")
         self.wifi_Edit = self.wifiWidget.findChild(QPushButton, "wifi_Edit")
+        self.wifi_Edit_cancel = self.wifiWidget.findChild(QPushButton, "wifiEditCancel")
         self.wifi_Del = self.wifiWidget.findChild(QPushButton, "wifi_Del")
         self.wifi_status = self.wifiWidget.findChild(QLabel, "status_label")
         self.availableWiFiradio = self.wifiWidget.findChild(QRadioButton, "availableWiFiradio")
@@ -60,6 +61,8 @@ class Ui(QDialog):
         self.wifi_psk.setEnabled(False)
         self.wifi_ssid.setEnabled(False)
         self.wifi_Edit.setEnabled(False)
+        self.wifi_Edit_cancel.hide()
+        self.wifi_Edit_cancel.clicked.connect(self.wifi_edit_cancel_btn_callback)
         self.wifi_Del.setEnabled(False)
         self.wifi_status.setText("")
         self.diaglog_btn.clicked.connect(lambda: self.dialog_btn_callback())
@@ -148,6 +151,7 @@ class Ui(QDialog):
             self.addNewWifiradio.setEnabled(False)
             self.wifi_Del.setEnabled(False)
             self.wifi_Edit.setText("OK")
+            self.wifi_Edit_cancel.show()
         else:
             self.wifi_Edit.setText("Edit")
             if self.wifi_update():
@@ -159,6 +163,16 @@ class Ui(QDialog):
                 self.wifi_psk.setText("")
                 self.wifi_status.setText("<html><head/><body><p><span style='color:#177B0A;'>Wifi details updated."
                                             "</span></p></body></html>")
+                self.wifi_Edit_cancel.hide()
+
+    def wifi_edit_cancel_btn_callback(self):
+        self.wifi_psk.setEnabled(False)
+        self.wifi_list_combo.setEnabled(True)
+        self.availableWiFiradio.setEnabled(True)
+        self.addNewWifiradio.setEnabled(True)
+        self.wifi_Del.setEnabled(True)
+        self.wifi_Edit.setText("Edit")
+        self.wifi_Edit_cancel.hide()
 
     def wifi_update(self):
         if os.path.isfile(self.wifi_path):
