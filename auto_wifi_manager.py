@@ -12,8 +12,9 @@ import drive_found
 class Ui(QDialog):
     def __init__(self):
         super(Ui, self).__init__()
-        uic.loadUi('auto_wifi_manager.ui', self)
-        self.wifiWidget = uic.loadUi('auto_wifi_manager_wifi_credential.ui')
+        path = "/usr/share/auto_wifi_manager/"
+        uic.loadUi(path + 'auto_wifi_manager.ui', self)
+        self.wifiWidget = uic.loadUi(path + 'auto_wifi_manager_wifi_credential.ui')
         self.setFixedSize(self.size())
         self.show()
 
@@ -248,7 +249,7 @@ class Ui(QDialog):
 if __name__ == '__main__':
     if os.getuid() != 0:
         print("Permission Denied\nRun as Super User")
-        exit(0)
+        sys.exit()
     else:
         app = QApplication(sys.argv)
         window = Ui()
