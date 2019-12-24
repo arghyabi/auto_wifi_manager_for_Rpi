@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>539</width>
-    <height>370</height>
+    <width>390</width>
+    <height>240</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,9 +20,9 @@
   <widget class="QComboBox" name="device_select">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>10</x>
      <y>20</y>
-     <width>401</width>
+     <width>291</width>
      <height>41</height>
     </rect>
    </property>
@@ -30,9 +30,9 @@
   <widget class="QLabel" name="selected_device">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>10</x>
      <y>70</y>
-     <width>401</width>
+     <width>371</width>
      <height>20</height>
     </rect>
    </property>
@@ -43,8 +43,8 @@
   <widget class="QPushButton" name="device_verification_btn">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>120</y>
+     <x>100</x>
+     <y>100</y>
      <width>181</width>
      <height>41</height>
     </rect>
@@ -56,9 +56,9 @@
   <widget class="QPushButton" name="refresh_btn">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>310</x>
      <y>20</y>
-     <width>89</width>
+     <width>71</width>
      <height>41</height>
     </rect>
    </property>
@@ -72,111 +72,30 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QFrame" name="frame">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>200</y>
-     <width>521</width>
-     <height>161</height>
-    </rect>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QPushButton" name="device_update_btn">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>20</y>
-      <width>201</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Update Device</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="wifi_credential_checkBox">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>20</y>
-      <width>251</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Add or Modify WiFi Credential</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="ip_founder_checkBox">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>50</y>
-      <width>201</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Add IP Founder code</string>
-    </property>
-   </widget>
-   <widget class="QProgressBar" name="progressBar">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>90</y>
-      <width>471</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="value">
-     <number>24</number>
-    </property>
-   </widget>
-   <widget class="QLabel" name="final_status_label">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>130</y>
-      <width>361</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>120</y>
-      <width>89</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Close</string>
-    </property>
-   </widget>
-  </widget>
   <widget class="QLabel" name="verification_status">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>170</y>
+     <x>10</x>
+     <y>210</y>
      <width>371</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#167b09;&quot;&gt;TextLabel&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="device_modify_btn">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>150</y>
+     <width>181</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Modify Device</string>
    </property>
   </widget>
  </widget>

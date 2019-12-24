@@ -5,252 +5,313 @@ import re
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
 import drive_found
 
 
 class Ui(QDialog):
-    def __init__(self):
-        super(Ui, self).__init__()
-        path = "/usr/share/auto_wifi_manager/"
-        uic.loadUi(path + 'auto_wifi_manager.ui', self)
-        self.wifiWidget = uic.loadUi(path + 'auto_wifi_manager_wifi_credential.ui')
-        self.setFixedSize(self.size())
-        self.show()
+	def __init__(self):
+		super(Ui, self).__init__()
+		path = "/usr/share/auto_wifi_manager/"
+		self.mainWidget = uic.loadUi(path + 'auto_wifi_manager.ui')
+		self.wifiWidget = uic.loadUi(path + 'auto_wifi_manager_wifi_credential.ui')
+		self.mainWidget.setFixedSize(self.mainWidget.size())
+		self.wifiWidget.setFixedSize(self.wifiWidget.size())
+		self.wifiWidget.move(QDesktopWidget().availableGeometry().center())
+		self.mainWidget.show()
 
-        self.combobox = self.findChild(QComboBox, "device_select")
-        self.deviceSelectLabel = self.findChild(QLabel, "selected_device")
-        self.refreshBtn = self.findChild(QPushButton, "refresh_btn")
-        self.verifyBtn = self.findChild(QPushButton, "device_verification_btn")
-        self.frame = self.findChild(QFrame, "frame")
-        self.verifyStatus = self.findChild(QLabel, "verification_status")
-        self.wifi_credential = self.findChild(QCheckBox, "wifi_credential_checkBox")
-        self.ip_founder_checkBox = self.findChild(QCheckBox, "ip_founder_checkBox")
-        self.final_status_label = self.findChild(QLabel, "final_status_label")
+		self.combobox = self.mainWidget.findChild(QComboBox, "device_select")
+		self.deviceSelectLabel = self.mainWidget.findChild(QLabel, "selected_device")
+		self.refreshBtn = self.mainWidget.findChild(QPushButton, "refresh_btn")
+		self.verifyBtn = self.mainWidget.findChild(QPushButton, "device_verification_btn")
+		self.verifyStatus = self.mainWidget.findChild(QLabel, "verification_status")
+		self.deviceModifyBtn = self.mainWidget.findChild(QPushButton, "device_modify_btn")
 
-        self.wifi_list_combo = self.wifiWidget.findChild(QComboBox, "wifiListCombo")
-        self.wifi_ssid = self.wifiWidget.findChild(QLineEdit, "wifi_ssid")
-        self.wifi_psk = self.wifiWidget.findChild(QLineEdit, "wifi_psk")
-        self.wifi_Edit = self.wifiWidget.findChild(QPushButton, "wifi_Edit")
-        self.wifi_Edit_cancel = self.wifiWidget.findChild(QPushButton, "wifiEditCancel")
-        self.wifi_Del = self.wifiWidget.findChild(QPushButton, "wifi_Del")
-        self.wifi_status = self.wifiWidget.findChild(QLabel, "status_label")
-        self.availableWiFiradio = self.wifiWidget.findChild(QRadioButton, "availableWiFiradio")
-        self.addNewWifiradio = self.wifiWidget.findChild(QRadioButton, "addNewWifiradio")
-        self.diaglog_btn = self.wifiWidget.findChild(QDialogButtonBox, "diaglog_box")
+		self.saved_wifi_combo_box = self.wifiWidget.findChild(QComboBox, "saved_wifi_combo_box")
+		self.saved_wifi_ssid_textedit = self.wifiWidget.findChild(QLineEdit, "saved_wifi_ssid_textedit")
+		self.saved_wifi_psk_textedit = self.wifiWidget.findChild(QLineEdit, "saved_wifi_psk_textedit")
+		self.saved_wifi_edit_btn = self.wifiWidget.findChild(QPushButton, "saved_wifi_edit_btn")
+		self.saved_wifi_cancel_btn = self.wifiWidget.findChild(QPushButton, "saved_wifi_cancel_btn")
+		self.saved_wifi_del_btn = self.wifiWidget.findChild(QPushButton, "saved_wifi_del_btn")
+		self.saved_wifi_save_btn = self.wifiWidget.findChild(QPushButton, "saved_wifi_save_btn")
+		self.saved_wifi_status_label = self.wifiWidget.findChild(QLabel, "saved_wifi_status_label")
+		self.saved_wifi_reset_btn = self.wifiWidget.findChild(QPushButton, "saved_wifi_reset_btn")
+		self.saved_wifi_show_password_checkbox = self.wifiWidget.findChild(QCheckBox, "saved_wifi_show_password_checkbox")
 
-        self.wifi_path = ""
+		self.new_wifi_ssid_textedit = self.wifiWidget.findChild(QLineEdit, "new_wifi_ssid_textedit")
+		self.new_wifi_psk_textedit = self.wifiWidget.findChild(QLineEdit, "new_wifi_psk_textedit")
+		self.new_wifi_disable_checkbox = self.wifiWidget.findChild(QCheckBox, "new_wifi_disable_checkbox")
+		self.new_wifi_calcel_btn = self.wifiWidget.findChild(QPushButton, "new_wifi_calcel_btn")
+		self.new_wifi_save_btn = self.wifiWidget.findChild(QPushButton, "new_wifi_save_btn")
+		self.new_wifi_status_label = self.wifiWidget.findChild(QLabel, "new_wifi_status_label")
+		self.new_wifi_show_password_checkbox = self.wifiWidget.findChild(QCheckBox, "new_wifi_show_password_checkbox")
 
-        self.initialization()
+		self.wifi_path = ""
 
-    def initialization(self):
-        self.combobox.addItem("Select the Device")
-        self.combobox.addItems(drive_found.get_devices())
-        self.update_device_select_label()
-        self.combobox.currentIndexChanged.connect(self.update_device_select_label)
-        self.refreshBtn.clicked.connect(self.refresh_device)
-        self.verifyBtn.clicked.connect(lambda: self.verify_device(self.combobox.currentText()))
-        self.frame.setEnabled(False)
-        self.verifyStatus.setText("")
-        self.wifi_credential.stateChanged.connect(self.add_modify_wifi_credential)
-        self.ip_founder_checkBox.stateChanged.connect(self.ip_founder)
+		self.initialization()
 
-        self.wifi_list_combo.addItem("Select WiFi")
-        self.wifi_list_combo.currentIndexChanged.connect(self.wifi_select_change)
-        self.wifi_Edit.clicked.connect(self.wifi_edit_btn_callback)
-        self.wifi_Del.clicked.connect(self.wifi_del_btn_callback)
-        self.wifi_psk.setEnabled(False)
-        self.wifi_ssid.setEnabled(False)
-        self.wifi_Edit.setEnabled(False)
-        self.wifi_Edit_cancel.hide()
-        self.wifi_Edit_cancel.clicked.connect(self.wifi_edit_cancel_btn_callback)
-        self.wifi_Del.setEnabled(False)
-        self.wifi_status.setText("")
-        self.diaglog_btn.clicked.connect(lambda: self.dialog_btn_callback())
 
-        self.wifiWidget.setWindowFlag(Qt.WindowCloseButtonHint, False)
-        self.wifiWidget.setWindowFlag(Qt.WindowMaximizeButtonHint, False)
+	def initialization(self):
+		self.combobox.addItem("Select the Device")
+		self.combobox.addItems(drive_found.get_devices())
+		self.update_device_select_label()
+		self.combobox.currentIndexChanged.connect(self.update_device_select_label)
+		self.refreshBtn.clicked.connect(self.refresh_device)
+		self.verifyBtn.clicked.connect(lambda: self.verify_device(self.combobox.currentText()))
+		self.deviceModifyBtn.clicked.connect(self.wifi_credential_UI_show)
+		self.verifyStatus.setText("")
+		self.verifyBtn.setEnabled(False)
+		self.deviceModifyBtn.setEnabled(False)
 
-    def verify_device(self, directory):
-        if os.path.isdir(directory + "/home/pi/"):
-            self.frame.setEnabled(True)
-            self.verifyStatus.setText("<html><head/><body><p><span style='color:#177B0A;'>Device is "
-                                      "Okay</span></p></body></html>")
-        else:
-            self.frame.setEnabled(False)
-            self.verifyStatus.setText("<html><head/><body><p><span style='color:#ff0000;'>Device Verification Failed, "
-                                      "Select the correct device</span></p></body></html>")
+		self.saved_wifi_combo_box.addItem("Select WiFi")
+		self.saved_wifi_combo_box.currentIndexChanged.connect(self.wifi_select_change)
+		self.saved_wifi_edit_btn.clicked.connect(self.wifi_edit_btn_callback)
+		self.saved_wifi_show_password_checkbox.toggled.connect(self.saved_wifi_show_password_checkbox_toggled)
+		self.saved_wifi_cancel_btn.clicked.connect(self.wifi_edit_cancel_btn_callback)
+		self.saved_wifi_reset_btn.clicked.connect(self.wifi_edit_reset_btn_callback)
+		self.saved_wifi_save_btn.clicked.connect(self.wifi_edit_save_btn_callback)
+		self.saved_wifi_del_btn.clicked.connect(self.wifi_del_btn_callback)
+		self.saved_wifi_ssid_textedit.hide()
+		self.saved_wifi_psk_textedit.hide()
+		self.saved_wifi_edit_btn.hide()
+		self.saved_wifi_cancel_btn.hide()
+		self.saved_wifi_del_btn.hide()
+		self.saved_wifi_save_btn.hide()
+		self.saved_wifi_show_password_checkbox.hide()
+		self.saved_wifi_reset_btn.hide()
+		self.saved_wifi_status_label.setText("")
 
-    def refresh_device(self):
-        self.combobox.clear()
-        self.combobox.addItem("Select the Device")
-        self.combobox.addItems(drive_found.get_devices())
-        self.update_device_select_label()
-        self.combobox.currentIndexChanged.connect(self.update_device_select_label)
-        self.verifyStatus.setText("")
-        self.frame.setEnabled(False)
+		self.new_wifi_save_btn.clicked.connect(self.new_wifi_save_btn_callback)
+		self.new_wifi_show_password_checkbox.toggled.connect(self.new_wifi_show_password_checkbox_toggled)
+		self.new_wifi_status_label.setText("")
 
-    def update_device_select_label(self):
-        if self.combobox.currentIndex() == 0:
-            self.deviceSelectLabel.setText("")
-            self.verifyBtn.setEnabled(False)
-        else:
-            self.deviceSelectLabel.setText(self.combobox.currentText())
-            self.verifyBtn.setEnabled(True)
 
-        self.frame.setEnabled(False)
-        self.verifyStatus.setText("")
+	def verify_device(self, directory):
+		if os.path.isdir(directory + "/home/pi/"):
+			self.verifyStatus.setText("<html><head/><body><p><span style='color:#177B0A;'>Device is "
+									  "Okay</span></p></body></html>")
+			self.deviceModifyBtn.setEnabled(True)
+		else:
+			self.verifyStatus.setText("<html><head/><body><p><span style='color:#ff0000;'>Device Verification Failed, "
+									  "Select the correct device</span></p></body></html>")
 
-    def add_modify_wifi_credential(self):
-        if self.wifi_credential.isChecked():
-            self.setEnabled(False)
-            self.wifiWidget.show()
-            wifi_list = []
-            self.wifi_path = self.combobox.currentText() + "/etc/wpa_supplicant/wpa_supplicant.conf"
 
-            if os.path.isfile(self.wifi_path):
-                f = open(self.wifi_path, "r")
-                data = [line.strip() for line in f.read().split("\n") if line.split()]
-                f.close()
+	def refresh_device(self):
+		self.combobox.clear()
+		self.combobox.addItem("Select the Device")
+		self.combobox.addItems(drive_found.get_devices())
+		self.update_device_select_label()
+		self.combobox.currentIndexChanged.connect(self.update_device_select_label)
+		self.verifyStatus.setText("")
+		self.verifyBtn.setEnabled(False)
+		self.deviceModifyBtn.setEnabled(False)
 
-                for line in range(len(data)):
-                    if re.findall("^network", data[line]) and re.findall("^ssid", data[line+1]):
-                        wifi_list.append(data[line+1][6:-1])
-                self.wifi_list_combo.clear()
-                self.wifi_list_combo.addItem("Select WiFi")
-                self.wifi_list_combo.addItems(wifi_list)
-            else:
-                self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential "
-                                                "file not found...</span></p></body></html>")
-        else:
-            self.final_status_label.setText("")
 
-    def dialog_btn_callback(self):
-        self.wifiWidget.hide()
-        self.setEnabled(True)
+	def update_device_select_label(self):
+		if self.combobox.currentIndex() == 0:
+			self.deviceSelectLabel.setText("")
+			self.verifyBtn.setEnabled(False)
+		else:
+			self.deviceSelectLabel.setText(self.combobox.currentText())
+			self.verifyBtn.setEnabled(True)
 
-    def ip_founder(self):
-        pass
+		self.verifyStatus.setText("")
 
-    def wifi_select_change(self):
-        if self.wifi_list_combo.currentIndex != 0:
-            self.wifi_ssid.setText(self.wifi_list_combo.currentText())
-            self.wifi_ssid.setEnabled(True)
-            self.wifi_Edit.setEnabled(True)
-            self.wifi_Del.setEnabled(True)
-        else:
-            self.wifi_ssid.setText('')
-            self.wifi_ssid.setEnabled(False)
-            self.wifi_Edit.setEnabled(False)
-            self.wifi_Del.setEnabled(False)
 
-    def wifi_edit_btn_callback(self):
-        if self.wifi_Edit.text() == "Edit":
-            self.wifi_psk.setEnabled(True)
-            self.wifi_list_combo.setEnabled(False)
-            self.availableWiFiradio.setEnabled(False)
-            self.addNewWifiradio.setEnabled(False)
-            self.wifi_Del.setEnabled(False)
-            self.wifi_Edit.setText("OK")
-            self.wifi_Edit_cancel.show()
-        else:
-            self.wifi_Edit.setText("Edit")
-            if self.wifi_update():
-                self.wifi_list_combo.setEnabled(True)
-                self.availableWiFiradio.setEnabled(True)
-                self.addNewWifiradio.setEnabled(True)
-                self.wifi_Del.setEnabled(True)
-                self.wifi_psk.setEnabled(False)
-                self.wifi_psk.setText("")
-                self.wifi_status.setText("<html><head/><body><p><span style='color:#177B0A;'>Wifi details updated."
-                                            "</span></p></body></html>")
-                self.wifi_Edit_cancel.hide()
+	def wifi_credential_UI_show(self):
+		self.wifiWidget.move(self.mainWidget.geometry().x(),self.mainWidget.geometry().y())
+		self.mainWidget.hide()
+		self.wifiWidget.show()
+		wifi_list = []
+		self.wifi_path = self.combobox.currentText() + "/etc/wpa_supplicant/wpa_supplicant.conf"
 
-    def wifi_edit_cancel_btn_callback(self):
-        self.wifi_psk.setEnabled(False)
-        self.wifi_list_combo.setEnabled(True)
-        self.availableWiFiradio.setEnabled(True)
-        self.addNewWifiradio.setEnabled(True)
-        self.wifi_Del.setEnabled(True)
-        self.wifi_Edit.setText("Edit")
-        self.wifi_Edit_cancel.hide()
+		if os.path.isfile(self.wifi_path):
+			f = open(self.wifi_path, "r")
+			data = [line.strip() for line in f.read().split("\n") if line.split()]
+			f.close()
 
-    def wifi_update(self):
-        if os.path.isfile(self.wifi_path):
-            f = open(self.wifi_path, "r")
-            data = [line.strip() for line in f.read().split("\n") if line.split()]
-            f.close()
+			for line in range(len(data)):
+				if re.findall("^network", data[line]) and re.findall("^ssid", data[line+1]):
+					wifi_list.append(data[line+1][6:-1])
+			self.saved_wifi_combo_box.clear()
+			self.saved_wifi_combo_box.addItem("Select WiFi")
+			self.saved_wifi_combo_box.addItems(wifi_list)
+		else:
+			self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential "
+											"file not found...</span></p></body></html>")
 
-            for line in range(len(data)):
-                if re.findall('^ssid="' + self.wifi_ssid.text() + '"', data[line]):
-                    data[line+1] = 'psk="' + str(self.wifi_psk.text()) + '"'
-            
-            temp = ""
-            for line in data:
-                temp += str(line) + "\n"
-            f = open(self.wifi_path, "w")
-            f.write(temp)
-            f.close()
-            return True
-        else:
-            self.wifi_status.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
-                                            "not found...</span></p></body></html>")
-            return False
 
-    def wifi_del_btn_callback(self):
-        if os.path.isfile(self.wifi_path):
-            f = open(self.wifi_path, "r")
-            data = [line.strip() for line in f.read().split("\n") if line.split()]
-            f.close()
+	def saved_wifi_show_password_checkbox_toggled(self):
+		if self.saved_wifi_show_password_checkbox.isChecked():
+			self.saved_wifi_psk_textedit.setEchoMode(QLineEdit.Normal)
+		else:
+			self.saved_wifi_psk_textedit.setEchoMode(QLineEdit.Password)
 
-            inNet = False
-            inNetLine = []
-            match = False
 
-            for line in range(len(data)):
-                if inNet:
-                    if re.findall('^}', data[line]):
-                        if match:
-                            inNetLine.append(line)
-                            for j in range(len(inNetLine)-1):
-                                data.pop(inNetLine[1])
-                            inNet = False
-                            inNetLine = []
-                            match = False
-                            break
-                        else:
-                            inNet = False
-                            inNetLine = []
-                    if re.findall('^ssid="' + self.wifi_ssid.text() + '"', data[line]):
-                        match = True
-                        inNetLine.append(line)
-                    inNetLine.append(line)
-                else:
-                    if re.findall('^network={', data[line]):
-                        inNet = True
-                        inNetLine.append(line)
-            
-            temp = ""
-            for line in data:
-                temp += str(line) + "\n"
-            f = open(self.wifi_path, "w")
-            f.write(temp)
-            f.close()
-            self.add_modify_wifi_credential()
-            self.wifi_status.setText("<html><head/><body><p><span style='color:#177B0A;'>Wifi details deleted."
-                                            "</span></p></body></html>")
-            return True
-        else:
-            self.wifi_status.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
-                                            "not found...</span></p></body></html>")
-            return False
+	def wifi_select_change(self):
+		if self.saved_wifi_combo_box.currentIndex() != 0:
+			self.saved_wifi_edit_btn.show()
+			self.saved_wifi_del_btn.show()
+		else:
+			self.saved_wifi_ssid_textedit.hide()
+			self.saved_wifi_psk_textedit.hide()
+			self.saved_wifi_edit_btn.hide()
+			self.saved_wifi_cancel_btn.hide()
+			self.saved_wifi_del_btn.hide()
+			self.saved_wifi_save_btn.hide()
+			self.saved_wifi_show_password_checkbox.hide()
+			self.saved_wifi_reset_btn.hide()
+			self.saved_wifi_status_label.setText("")
+
+
+	def wifi_edit_btn_callback(self):
+		self.saved_wifi_del_btn.hide()
+		self.saved_wifi_edit_btn.hide()
+		self.saved_wifi_ssid_textedit.show()
+		self.saved_wifi_psk_textedit.show()
+		self.saved_wifi_cancel_btn.show()
+		self.saved_wifi_save_btn.show()
+		self.saved_wifi_show_password_checkbox.show()
+		self.saved_wifi_reset_btn.show()
+		self.saved_wifi_ssid_textedit.setText(self.saved_wifi_combo_box.currentText())
+		self.saved_wifi_psk_textedit.setText("")
+		self.saved_wifi_status_label.setText("")
+
+
+	def wifi_edit_cancel_btn_callback(self):
+		self.saved_wifi_del_btn.show()
+		self.saved_wifi_edit_btn.show()
+		self.saved_wifi_ssid_textedit.hide()
+		self.saved_wifi_psk_textedit.hide()
+		self.saved_wifi_cancel_btn.hide()
+		self.saved_wifi_save_btn.hide()
+		self.saved_wifi_show_password_checkbox.hide()
+		self.saved_wifi_reset_btn.hide()
+		self.saved_wifi_ssid_textedit.setText("")
+		self.saved_wifi_psk_textedit.setText("")
+		self.saved_wifi_status_label.setText("")
+
+
+	def wifi_edit_reset_btn_callback(self):
+		self.saved_wifi_ssid_textedit.setText(self.saved_wifi_combo_box.currentText())
+		self.saved_wifi_psk_textedit.setText("")
+
+
+	def wifi_edit_save_btn_callback(self):
+		if os.path.isfile(self.wifi_path):
+			f = open(self.wifi_path, "r")
+			data = [line for line in f.read().split("\n") if line.split()]
+			f.close()
+
+			for line in range(len(data)):
+				if re.findall('ssid="' + self.saved_wifi_ssid_textedit.text() + '"', data[line]):
+					point = re.search('psk="',data[line+1]).span()[-1]
+					data[line+1] = data[line+1][:point] + str(self.saved_wifi_psk_textedit.text()) + '"'
+
+			temp = ""
+			for line in data:
+				temp += str(line) + "\n"
+			f = open(self.wifi_path, "w")
+			f.write(temp)
+			f.close()
+
+			self.saved_wifi_del_btn.show()
+			self.saved_wifi_edit_btn.show()
+			self.saved_wifi_ssid_textedit.hide()
+			self.saved_wifi_psk_textedit.hide()
+			self.saved_wifi_cancel_btn.hide()
+			self.saved_wifi_save_btn.hide()
+			self.saved_wifi_show_password_checkbox.hide()
+			self.saved_wifi_reset_btn.hide()
+			self.saved_wifi_ssid_textedit.setText("")
+			self.saved_wifi_psk_textedit.setText("")
+			self.wifi_credential_UI_show()
+			self.saved_wifi_status_label.setText("<html><head/><body><p><span style='color:#177B0A;'>Updated "
+											"Successfully</span></p></body></html>")
+		else:
+			self.saved_wifi_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
+											"not found...</span></p></body></html>")
+
+
+	def wifi_del_btn_callback(self):
+		if os.path.isfile(self.wifi_path):
+			f = open(self.wifi_path, "r")
+			data = [line for line in f.read().split("\n") if line.split()]
+			f.close()
+
+			start = 0
+			end = 0
+
+			wifi_found = False
+			for line in range(len(data)):
+				if re.findall("^network={",data[line]):
+					start = line
+				if re.findall("^}",data[line]):
+					end = line
+					if wifi_found:
+						break
+				if re.findall('ssid="' + self.saved_wifi_combo_box.currentText() + '"', data[line]):
+					wifi_found = True
+
+			del data[start:end+1]
+
+			f= open(self.wifi_path, "w")
+			for i in data:
+				f.write(str(i)+"\n")
+			f.close()
+
+			self.wifi_credential_UI_show()
+			self.saved_wifi_status_label.setText("<html><head/><body><p><span style='color:#177B0A;'>Wifi details deleted."
+											"</span></p></body></html>")
+			return True
+		else:
+			self.saved_wifi_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential file "
+											"not found...</span></p></body></html>")
+			return False
+
+
+	def new_wifi_show_password_checkbox_toggled(self):
+		if self.new_wifi_show_password_checkbox.isChecked():
+			self.new_wifi_psk_textedit.setEchoMode(QLineEdit.Normal)
+		else:
+			self.new_wifi_psk_textedit.setEchoMode(QLineEdit.Password)
+
+
+	def new_wifi_save_btn_callback(self):
+		if len(self.new_wifi_ssid_textedit.text()):
+
+			data = 'network={\n\tssid="'
+			data = data + self.new_wifi_ssid_textedit.text() + '"\n\tpsk="'
+			data = data + self.new_wifi_psk_textedit.text() + '"\n\t'
+			data = data + "key_mgmt=WPA-PSK\n}\n"
+
+			if os.path.isfile(self.wifi_path):
+				f = open(self.wifi_path, "r")
+				file_data = f.read()
+				f.close()
+
+				f= open(self.wifi_path, "w")
+				f.write(file_data + "\n\n" + data)
+				f.close()
+
+			self.new_wifi_ssid_textedit.setText("")
+			self.new_wifi_psk_textedit.setText("")
+			self.wifi_credential_UI_show()
+
+			self.new_wifi_status_label.setText("<html><head/><body><p><span style='color:#177B0A;'>New WiFi details "
+											"saved successfully</span></p></body></html>")
+		else:
+			self.new_wifi_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>SSID can't be blank"
+											"</span></p></body></html>")
+			self.new_wifi_ssid_textedit.setFocus()
 
 
 if __name__ == '__main__':
-    if os.getuid() != 0:
-        print("Permission Denied\nRun as Super User")
-        sys.exit()
-    else:
-        app = QApplication(sys.argv)
-        window = Ui()
-        sys.exit(app.exec_())
+	if os.getuid() != 0:
+		print("Permission Denied\nRun as Super User")
+		sys.exit()
+	else:
+		app = QApplication(sys.argv)
+		window = Ui()
+		sys.exit(app.exec_())
