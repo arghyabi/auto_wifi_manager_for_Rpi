@@ -165,7 +165,7 @@ class Ui(QDialog):
 			self.saved_wifi_combo_box.addItem("Select WiFi")
 			self.saved_wifi_combo_box.addItems(wifi_list)
 		else:
-			self.final_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential "
+			self.saved_wifi_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>Wifi credential "
 											"file not found...</span></p></body></html>")
 
 
