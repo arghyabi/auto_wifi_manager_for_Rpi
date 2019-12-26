@@ -1,5 +1,5 @@
 # auto_wifi_manager_for_Rpi
 
-Modify the /etc/profile
+Modify the /etc/rc.local
 
-add "python [location/of/ipfounder]/ipfounder.py &" at the buttom of the file
+add "python3 [location/of/ipfounder]/ipfounder.py &" at the buttom of the file

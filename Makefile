@@ -7,6 +7,7 @@ install:
 	sudo mkdir -p /usr/share/auto_wifi_manager
 	sudo cp *.ui /usr/share/auto_wifi_manager/
 	sudo cp Wifi-Logo.png /usr/share/auto_wifi_manager/
+	sudo cp ipfounder.py /usr/share/auto_wifi_manager/
 
 clean:
 	rm auto_wifi_manager

@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import time
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
@@ -13,9 +14,9 @@ import drive_found
 class Ui(QDialog):
 	def __init__(self):
 		super(Ui, self).__init__()
-		path = "/usr/share/auto_wifi_manager/"
-		self.mainWidget = uic.loadUi(path + 'auto_wifi_manager.ui')
-		self.wifiWidget = uic.loadUi(path + 'auto_wifi_manager_wifi_credential.ui')
+		self.src_path = "/usr/share/auto_wifi_manager/"
+		self.mainWidget = uic.loadUi(os.path.join(self.src_path + 'auto_wifi_manager.ui'))
+		self.wifiWidget = uic.loadUi(os.path.join(self.src_path + 'auto_wifi_manager_wifi_credential.ui'))
 		self.mainWidget.setFixedSize(self.mainWidget.size())
 		self.wifiWidget.setFixedSize(self.wifiWidget.size())
 		self.wifiWidget.move(QDesktopWidget().availableGeometry().center())
@@ -27,6 +28,8 @@ class Ui(QDialog):
 		self.verifyBtn = self.mainWidget.findChild(QPushButton, "device_verification_btn")
 		self.verifyStatus = self.mainWidget.findChild(QLabel, "verification_status")
 		self.deviceModifyBtn = self.mainWidget.findChild(QPushButton, "device_modify_btn")
+
+		self.tabWidget = self.wifiWidget.findChild(QTabWidget, "tabWidget")
 
 		self.saved_wifi_combo_box = self.wifiWidget.findChild(QComboBox, "saved_wifi_combo_box")
 		self.saved_wifi_ssid_textedit = self.wifiWidget.findChild(QLineEdit, "saved_wifi_ssid_textedit")
@@ -47,6 +50,9 @@ class Ui(QDialog):
 		self.new_wifi_status_label = self.wifiWidget.findChild(QLabel, "new_wifi_status_label")
 		self.new_wifi_show_password_checkbox = self.wifiWidget.findChild(QCheckBox, "new_wifi_show_password_checkbox")
 
+		self.ip_founder_copy_btn = self.wifiWidget.findChild(QPushButton, "ip_founder_copy_btn")
+		self.ip_founder_copy_status_label = self.wifiWidget.findChild(QLabel, "ip_founder_copy_status_label")
+
 		self.wifi_path = ""
 
 		self.initialization()
@@ -63,6 +69,8 @@ class Ui(QDialog):
 		self.verifyStatus.setText("")
 		self.verifyBtn.setEnabled(False)
 		self.deviceModifyBtn.setEnabled(False)
+
+		self.tabWidget.currentChanged.connect(self.tab_change_callback)
 
 		self.saved_wifi_combo_box.addItem("Select WiFi")
 		self.saved_wifi_combo_box.currentIndexChanged.connect(self.wifi_select_change)
@@ -85,6 +93,9 @@ class Ui(QDialog):
 		self.new_wifi_save_btn.clicked.connect(self.new_wifi_save_btn_callback)
 		self.new_wifi_show_password_checkbox.toggled.connect(self.new_wifi_show_password_checkbox_toggled)
 		self.new_wifi_status_label.setText("")
+
+		self.ip_founder_copy_btn.clicked.connect(self.ip_founder_copy_btn_callback)
+		self.ip_founder_copy_status_label.setText("")
 
 
 	def verify_device(self, directory):
@@ -119,10 +130,26 @@ class Ui(QDialog):
 		self.verifyStatus.setText("")
 
 
+	def tab_change_callback(self):
+		if self.tabWidget.currentIndex() == 2:
+			dest_folder_path = os.path.join(self.combobox.currentText(), "wifi_manager")
+			dest_file_path = os.path.join(dest_folder_path, "ipfounder.py")
+			if  not os.path.exists(dest_folder_path):
+				self.ip_founder_copy_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'><b>wifi_manager"
+											"</b> folder is not available</span></p></body></html>")
+			if os.path.exists(dest_folder_path) and not os.path.exists(dest_file_path):
+				self.ip_founder_copy_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'><b>ipfounder.py"
+											"</b> is not available</span></p></body></html>")
+			if os.path.exists(dest_folder_path) and os.path.exists(dest_file_path):
+				self.ip_founder_copy_status_label.setText("<html><head/><body><p><span style='color:#177B0A;'><b>ipfounder.py"
+											"</b> is already available</span></p></body></html>")
+
+
 	def wifi_credential_UI_show(self):
 		self.wifiWidget.move(self.mainWidget.geometry().x(),self.mainWidget.geometry().y())
 		self.mainWidget.hide()
 		self.wifiWidget.show()
+		self.tab_change_callback()
 		wifi_list = []
 		self.wifi_path = self.combobox.currentText() + "/etc/wpa_supplicant/wpa_supplicant.conf"
 
@@ -153,6 +180,13 @@ class Ui(QDialog):
 		if self.saved_wifi_combo_box.currentIndex() != 0:
 			self.saved_wifi_edit_btn.show()
 			self.saved_wifi_del_btn.show()
+			self.saved_wifi_ssid_textedit.hide()
+			self.saved_wifi_psk_textedit.hide()
+			self.saved_wifi_cancel_btn.hide()
+			self.saved_wifi_save_btn.hide()
+			self.saved_wifi_show_password_checkbox.hide()
+			self.saved_wifi_reset_btn.hide()
+			self.saved_wifi_status_label.setText("")
 		else:
 			self.saved_wifi_ssid_textedit.hide()
 			self.saved_wifi_psk_textedit.hide()
@@ -280,7 +314,6 @@ class Ui(QDialog):
 
 	def new_wifi_save_btn_callback(self):
 		if len(self.new_wifi_ssid_textedit.text()):
-
 			data = 'network={\n\tssid="'
 			data = data + self.new_wifi_ssid_textedit.text() + '"\n\tpsk="'
 			data = data + self.new_wifi_psk_textedit.text() + '"\n\t'
@@ -305,6 +338,17 @@ class Ui(QDialog):
 			self.new_wifi_status_label.setText("<html><head/><body><p><span style='color:#ff0000;'>SSID can't be blank"
 											"</span></p></body></html>")
 			self.new_wifi_ssid_textedit.setFocus()
+
+
+	def ip_founder_copy_btn_callback(self):
+		dest_folder_path = os.path.join(self.combobox.currentText(), "wifi_manager")
+		src_file_path = os.path.join(self.src_path, "ipfounder.py")
+		if  not os.path.exists(dest_folder_path):
+			os.mkdir(dest_folder_path)
+		os.popen("cp " + src_file_path + " " + dest_folder_path)
+		time.sleep(1)
+		self.ip_founder_copy_status_label.setText("<html><head/><body><p><span style='color:#177B0A;'><b>ipfounder.py"
+											"</b> is copied to the location</span></p></body></html>")
 
 
 if __name__ == '__main__':
