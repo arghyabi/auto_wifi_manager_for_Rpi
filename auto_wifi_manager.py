@@ -9,6 +9,22 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 import drive_found
+import download_etcher
+
+file_links = []
+files = []
+thread_error = 0
+
+class Thread_code(QThread):
+	def __init__(self):
+		super().__init__()
+
+	def run(self):
+		global file_links
+		global files
+		global thread_error
+		thread_error, file_links = download_etcher.get_file_links()
+		files = [f.split("/")[-1] for f in file_links]
 
 
 class Ui(QDialog):
@@ -21,6 +37,13 @@ class Ui(QDialog):
 		self.wifiWidget.setFixedSize(self.wifiWidget.size())
 		self.wifiWidget.move(QDesktopWidget().availableGeometry().center())
 		self.mainWidget.show()
+
+		self.etcher_downlaod_combobox = self.mainWidget.findChild(QComboBox, "etcher_download_combobox")
+		self.etcher_downlaod_connect_btn = self.mainWidget.findChild(QPushButton, "download_connect")
+		self.etcher_downlaod_image_select_label = self.mainWidget.findChild(QLabel, "download_image_select")
+		self.etcher_downlaod_download_btn = self.mainWidget.findChild(QPushButton, "etcher_download_btn")
+		self.etcher_downlaod_progress_bar = self.mainWidget.findChild(QProgressBar, "download_progress_bar")
+		self.etcher_downlaod_status_label = self.mainWidget.findChild(QLabel, "download_status")
 
 		self.combobox = self.mainWidget.findChild(QComboBox, "device_select")
 		self.deviceSelectLabel = self.mainWidget.findChild(QLabel, "selected_device")
@@ -59,6 +82,14 @@ class Ui(QDialog):
 
 
 	def initialization(self):
+		self.etcher_downlaod_combobox.addItem("Select the Etcher version")
+		self.etcher_downlaod_connect_btn.clicked.connect(self.connect_and_grab_file_info)
+		self.etcher_downlaod_image_select_label.setText("")
+		self.etcher_downlaod_download_btn.setEnabled(False)
+		self.etcher_downlaod_progress_bar.setValue(0)
+		self.etcher_downlaod_progress_bar.setEnabled(False)
+		self.etcher_downlaod_status_label.setText("")
+
 		self.combobox.addItem("Select the Device")
 		self.combobox.addItems(drive_found.get_devices())
 		self.update_device_select_label()
@@ -97,6 +128,25 @@ class Ui(QDialog):
 		self.ip_founder_copy_btn.clicked.connect(self.ip_founder_copy_btn_callback)
 		self.ip_founder_copy_status_label.setText("")
 
+
+	def connect_and_grab_file_info(self):
+		self.etcher_downlaod_status_label.setText("<html><head/><body><p><span style='color:#177B0A;'>Connecting...</span></p></body></html>")
+		try:
+			self.t = Thread_code()
+			self.t.finished.connect(self.status_update)
+			self.t.start()
+		except Exception as e:
+			print(e)
+
+	def status_update(self):
+		global files
+		global thread_error
+		if thread_error == 0:
+			self.etcher_downlaod_combobox.clear()
+			self.etcher_downlaod_combobox.addItems(files)
+			self.etcher_downlaod_status_label.setText("<html><head/><body><p><span style='color:#177B0A;'>Data Updated</span></p></body></html>")
+		else:
+			self.etcher_downlaod_status_label.setText("<html><head/><body><p><span style='color:#FF0000;'>Something Wrong Happend...</span></p></body></html>")
 
 	def verify_device(self, directory):
 		if os.path.isdir(directory + "/home/pi/"):
@@ -345,10 +395,30 @@ class Ui(QDialog):
 		src_file_path = os.path.join(self.src_path, "ipfounder.py")
 		if  not os.path.exists(dest_folder_path):
 			os.mkdir(dest_folder_path)
-		os.popen("cp " + src_file_path + " " + dest_folder_path)
+		os.popen("cp '" + src_file_path + "' '" + dest_folder_path + "'")
 		time.sleep(1)
 		self.ip_founder_copy_status_label.setText("<html><head/><body><p><span style='color:#177B0A;'><b>ipfounder.py"
 											"</b> is copied to the location</span></p></body></html>")
+
+		rc_local_file_path = os.path.join(self.combobox.currentText(), "etc/rc.local")
+		if os.path.exists(rc_local_file_path):
+			f = open(rc_local_file_path, "r")
+			data = [line for line in f.read().split("\n") if line.split()]
+			f.close()
+
+			cmd_line_found = False
+			cmd = "python /wifi_manager/ipfounder.py &"
+			for line in data:
+				if re.findall(cmd , line):
+					cmd_line_found = True
+					break
+
+			if not cmd_line_found:
+				f = open(rc_local_file_path, "w")
+				for line in range(len(data)-1):
+					f.write(str(data[line]) + "\n")
+				f.write("\n" + cmd + "\n\nexit 0\n")
+				f.close()
 
 
 if __name__ == '__main__':

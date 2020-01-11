@@ -17,86 +17,190 @@
    <iconset>
     <normaloff>Wifi-Logo.png</normaloff>Wifi-Logo.png</iconset>
   </property>
-  <widget class="QComboBox" name="device_select">
+  <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>20</y>
-     <width>291</width>
-     <height>41</height>
+     <x>0</x>
+     <y>0</y>
+     <width>391</width>
+     <height>241</height>
     </rect>
    </property>
-  </widget>
-  <widget class="QLabel" name="selected_device">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>70</y>
-     <width>371</width>
-     <height>20</height>
-    </rect>
+   <property name="currentIndex">
+    <number>0</number>
    </property>
-   <property name="text">
-    <string>TextLabel</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="device_verification_btn">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>100</y>
-     <width>181</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Verify Device</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="refresh_btn">
-   <property name="geometry">
-    <rect>
-     <x>310</x>
-     <y>20</y>
-     <width>71</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Refresh</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QLabel" name="verification_status">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>210</y>
-     <width>371</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#167b09;&quot;&gt;TextLabel&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="device_modify_btn">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>150</y>
-     <width>181</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Modify Device</string>
-   </property>
+   <widget class="QWidget" name="etcher_downloa_tab">
+    <attribute name="title">
+     <string>Download Etcher</string>
+    </attribute>
+    <widget class="QLabel" name="download_image_select">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>371</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="download_connect">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>10</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Connect</string>
+     </property>
+     <property name="default">
+      <bool>false</bool>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="etcher_download_btn">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>90</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Download</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="etcher_download_combobox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>281</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QProgressBar" name="download_progress_bar">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>150</y>
+       <width>351</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="value">
+      <number>24</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="download_status">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>180</y>
+       <width>371</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="device_verify_tab">
+    <attribute name="title">
+     <string>Deivce Verify</string>
+    </attribute>
+    <widget class="QComboBox" name="device_select">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>281</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="device_modify_btn">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>140</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Modify Device</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="refresh_btn">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>10</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Refresh</string>
+     </property>
+     <property name="default">
+      <bool>false</bool>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="selected_device">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>60</y>
+       <width>371</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="device_verification_btn">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>90</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Verify Device</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="verification_status">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>190</y>
+       <width>371</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#167b09;&quot;&gt;TextLabel&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
  </widget>
  <resources/>
